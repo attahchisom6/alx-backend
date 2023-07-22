@@ -12,7 +12,8 @@ def index_range(page: int, page_size: int) -> Tuple:
     Args:
         @page: (integer): the particular number of the page we are dealing with
         @page (integer): number of items per page
-    Return: a 2-size tuple with firt index abd last index of items per each page
+    Return: a 2-sized tuple with firt index and last index of items
+    per each page
     """
     page -= 1
     first_idx = page * page_size
