@@ -78,6 +78,6 @@ class Server:
                 "data": self.get_page(page, page_size),
                 "next_page": None if page + 1 <= len_db else page + 1,
                 "prev_page": None if page - 1 <= 0 else page - 1,
-                "total_page": math.ceil(len_db / page_size)
+                "total_pages": math.ceil(len_db / page_size)
             }
         return page_obj
