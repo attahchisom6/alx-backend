@@ -61,7 +61,6 @@ class Server:
         next_index = index + page_size
 
         # this block will serve to handle the case of delected rows
-        # and also check if we are in within the valid index range
         pages = []
         for k in range(index, next_index):
             if not dictt.get(k):
