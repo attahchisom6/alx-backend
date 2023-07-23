@@ -54,22 +54,25 @@ class Server:
         page_size: the current page size
         data: The actual page of the dataset
         """
-        assert type(index) == int and index < len(self.indexed_dataset())
+        assert type(index) == int and type(page_size) == int
+        assert 0 <= index < len(self.indexed_dataset())
 
         dictt = self.indexed_dataset()
         next_index = index + page_size
-        last_valid_index = len(dictt)
-        if next_index > last_valid_index:
-            next_index = last_valid_index
 
         # this block will serve to handle the case of delected rows
-        if next_index in dictt.keys() and not dictt.get(next_index):
-            next_index += 1
+        # and also check if we are in within the valid index range
+        pages = []
+        for k in range(index, next_index):
+            if not dictt.get(k):
+                k += 1
+                next_index += 1
+            pages.append(dictt.get(k))
 
-        obj_dict = {
+        object_dict = {
                 "index": index,
-                "data": [dictt.get(key) for key in range(index, next_index)],
-                "page_size": page_size,
+                "data": pages,
+                "page": page_size,
                 "next_index": next_index
             }
-        return obj_dict
+        return object_dict
