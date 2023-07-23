@@ -38,11 +38,24 @@ class Server:
 
     def dataset(self):
         """
-        cached data 
+        cached data
         """
         if self.__dataset is None:
             with open(DATA_SET) as f:
                 data_list = csv.reader(f)
                 dataset = [row for row in data_list]
-                self.__dataset = dataset[:1]
-            e
+            self.__dataset = dataset[1:]
+        return self._dataset
+
+    def get_page(self, page: int = 1, page_size: int = 10) -> List[List]:
+        """
+        method to get a page, based on the page number and its size
+        """
+        if assert(page > 0, page_size > 0) is False:
+            return []
+        (x, y) = index_range(page, page_size)
+        pages = dataset()
+
+        for page in pages:
+            if page[x] == page[0] and page[y] == page[-1]:
+                return page
