@@ -58,3 +58,27 @@ class Server:
         pages = self.dataset()
 
         return pages[start_idx:end_idx]
+
+    def get_hyper(self, page: int = 1, page_size: int = 10) -> List[List[str]]:
+        """
+        This function will return a dictionary with these keys-value
+        pair format
+        page_size: no. of items in the page
+        page: page_number
+        data: dataset page
+        next_page: next page number or None
+        prev_page: previous pqge number or None
+        total_pages: total number of pages in the dataset
+        """
+        len_db = len(self.dataset())
+        total_pages = math.ceil(len_db / page_size)
+
+        page_obj = {
+                "page_size": page_size,
+                "page": page,
+                "data": self.get_page(page, page_size),
+                "next_page": None if page + 1 > total_pages else page + 1,
+                "prev_page": None if page - 1 <= 0 else page - 1,
+                "total_pages": total_pages
+            }
+        return page_obj
