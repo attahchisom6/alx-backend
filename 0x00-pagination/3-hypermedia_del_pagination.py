@@ -39,7 +39,7 @@ class Server:
         if self.__indexed_dataset is None:
             dataset = self.dataset()
             truncated_dataset = dataset[:1000]
-            self.__indexed_set = {
+            self.__indexed_dataset = {
                     k: dataset[k] for k in range(len(dataset))
                 }
         return self.__indexed_dataset
@@ -50,16 +50,26 @@ class Server:
         key-value pair format
         index: curr_start_idx current starting index of the return page
         next_index: next_start_idx starting index of the next page, it also
-        the ending index of the  urrent page
+        the ending index of the<F11>  urrent page
         page_size: the current page size
         data: The actual page of the dataset
         """
         assert type(index) == int and index < len(self.indexed_dataset())
 
+        dictt = self.indexed_dataset()
+        next_index = index + page_size
+        last_valid_index = len(dictt)
+        if next_index > last_valid_index:
+            next_index = last_valid_index
+
+        # this block will serve to handle the case of delected rows
+        if next_index in dictt.keys() and not dictt.get(next_index):
+            next_index += 1
+
         obj_dict = {
-                "index": index * page_size,
-                "next_index": index + page_size,
+                "index": index,
+                "data": [dictt.get(key) for key in range(index, next_index)],
                 "page_size": page_size,
-                "data": self.indexed_dataset()
+                "next_index": next_index
             }
         return obj_dict
