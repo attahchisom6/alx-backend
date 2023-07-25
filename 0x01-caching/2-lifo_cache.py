@@ -32,7 +32,6 @@ class LIFOCache(BaseCaching):
             discarded_key = list_dict[-1]
             print("DISCARD: {}".format(discarded_key))
             del dictt[discarded_key]
-        dictt[key] = item
 
     def get(self, key):
         """
