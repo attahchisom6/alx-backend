@@ -27,9 +27,9 @@ class FIFOCache(BaseCaching):
         dictt[key] = item
 
         if len(dictt) > BaseCaching.MAX_ITEMS:
-            list_dict = list(dictt.items())
-            discarded_key = list_dict[0][0]
-            print("DISCARDED: {}".format(discarded_key))
+            list_dict = list(dictt.keys())
+            discarded_key = list_dict[0]
+            print("DISCARD: {}".format(discarded_key))
             del dictt[discarded_key]
 
     def get(self, key):
