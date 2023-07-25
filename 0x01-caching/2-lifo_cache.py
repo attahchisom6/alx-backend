@@ -30,7 +30,7 @@ class LIFOCache(BaseCaching):
 
         if len(dictt) > BaseCaching.MAX_ITEMS:
             print("DISCARD: {}".format(self.last_key))
-            dictt[self.last_key]
+            del dictt[self.last_key]
         self.last_key = key
 
     def get(self, key):
