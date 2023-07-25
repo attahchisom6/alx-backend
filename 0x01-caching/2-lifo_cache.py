@@ -15,6 +15,7 @@ class LIFOCache(BaseCaching):
         initializing
         """
         super().__init__()
+        self.last_key = ""
 
     def put(self, key, item):
         """
@@ -28,10 +29,9 @@ class LIFOCache(BaseCaching):
         dictt[key] = item
 
         if len(dictt) > BaseCaching.MAX_ITEMS:
-            list_dict = list(dictt.keys())
-            discarded_key = list_dict[-1]
-            print("DISCARD: {}".format(discarded_key))
-            del dictt[discarded_key]
+            print("DISCARD: {}".format(self.last_key))
+            dictt[self.last_key]
+        self.last_key = key
 
     def get(self, key):
         """
@@ -40,4 +40,4 @@ class LIFOCache(BaseCaching):
         dictt = self.cache_data
         if key is None or key not in dictt.keys():
             return None
-        return dictt[key]&
+        return dictt[key]
