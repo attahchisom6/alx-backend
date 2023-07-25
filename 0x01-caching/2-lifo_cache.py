@@ -40,4 +40,4 @@ class LIFOCache(BaseCaching):
         dictt = self.cache_data
         if key is None or key not in dictt.keys():
             return None
-        return dictt[key]
+        return dictt[key]&
