@@ -1,63 +1,44 @@
 #!/usr/bin/env python3
-"""
-module of a child class to a parent xaching system
+"""100-lfu_cache module
 """
 from base_caching import BaseCaching
 
 
 class LFUCache(BaseCaching):
-    """
-    caching model based on least frequency use LFU
-    we track number of times keys are accessed in the cache and when the cache
-    is full, we delete the one with the least number of access
-    To achievw this:
-    1. we set up a counter to count the number/frequency of access of keys
-    2. we push the key with highest number of access to the end of a stack
-    so that we get a stack that is a dict of keys with integers values in
-    ascending order of their frequencies
+    """LFUCache class
     """
     def __init__(self):
-        """
-        initializing
+        """__init__ function
         """
         super().__init__()
-        self.stack = {}
+        self.call = {}
 
     def put(self, key, item):
+        """put function
+
+        Args:
+            key ([type]): [description]
+            item ([type]): [description]
         """
-        this method will update the value of existing keys and when the key
-        does not exist creates
-        a new item with the key
-        """
-        if key is None or item is None:
-            return
-
-        dictt = self.cache_data
-        stack = self.stack
-
-        dictt[key] = item
-
-        if len(stack) > BaseCaching.MAX_ITEMS:
-            discarded_key = min(stack, key=stack.get)
-            print("DISCARD: {}".format(discarded_key))
-            del dictt[discarded_key]
-            del stack[discarded_key]
-
-        if key not in stack.keys():
-            stack[key] = 0
-        else:
-            stack[key] += 1
+        if key and item:
+            self.cache_data[key] = item
+            if len(self.cache_data) > BaseCaching.MAX_ITEMS:
+                min_key = min(self.call, key=self.call.get)
+                print("DISCARD: {}".format(min_key))
+                del self.cache_data[min_key]
+                del self.call[min_key]
+            if key not in self.call.keys():
+                self.call[key] = 0
+            else:
+                self.call[key] += 1
 
     def get(self, key):
-        """
-        get an item by the given key
-        """
-        dictt = self.cache_data
-        stack = self.stack
+        """get function
 
-        if key is None or key not in dictt.keys():
+        Args:
+            key ([type]): [description]
+        """
+        if key is None or key not in self.cache_data:
             return None
-
-        stack[key] += 1
-
-        return dictt[key]
+        self.call[key] += 1
+        return self.cache_data.get(key)
