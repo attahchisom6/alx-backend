@@ -45,6 +45,8 @@ class LFUCache(BaseCaching):
 
         if key not in stack.keys():
             stack[key] = 0
+        else:
+            stack[key] += 1
 
     def get(self, key):
         """
