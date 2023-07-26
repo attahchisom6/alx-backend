@@ -37,9 +37,6 @@ class LRUCache(BaseCaching):
 
         if key not in stack:
             stack.append(key)
-        else:
-            stack.remove(key)
-            stack.append(key)
 
         if len(dictt) > BaseCaching.MAX_ITEMS:
             discarded_key = stack.pop(0)
@@ -54,4 +51,9 @@ class LRUCache(BaseCaching):
 
         if key is None or key not in dictt.keys():
             return None
+        # each time a key is accessed  by the get method, the key is appended
+        # to the end of the list
+
+        self.stack.remove(key)
+        self.stack.append(key)
         return dictt[key]
