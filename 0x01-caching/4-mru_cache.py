@@ -43,9 +43,6 @@ class MRUCache(BaseCaching):
             print("DISCARD: {}".format(discarded_key))
             del dictt[discarded_key]
 
-        # dictt[key] = item
-        # stack.append(key)
-
     def get(self, key):
         """
         get a value associated with a given key
