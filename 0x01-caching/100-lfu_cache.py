@@ -4,6 +4,7 @@ module of a child class to a parent xaching system
 """
 from base_caching import BaseCaching
 
+
 class LFUCache(BaseCaching):
     """
     caching model based on least frequency use LFU
