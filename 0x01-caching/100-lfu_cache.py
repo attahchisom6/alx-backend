@@ -37,7 +37,7 @@ class LFUCache(BaseCaching):
 
         dictt[key] = item
 
-        if len(stack) > BaseCaching.MAX_ITEMS:
+        if len(dictt) > BaseCaching.MAX_ITEMS:
             discarded_key = min(stack, key=stack.get)
             print("DISCARD: {}".format(discarded_key))
             del dictt[discarded_key]
