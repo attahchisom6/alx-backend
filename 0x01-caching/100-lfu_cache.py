@@ -38,7 +38,7 @@ class LFUCache(BaseCaching):
         dictt[key] = item
 
         if key not in stack.keys():
-            stack[key] = 1
+            stack[key] = 0
         else:
             stack[key] += 1
 
