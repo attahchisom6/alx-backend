@@ -33,18 +33,18 @@ class MRUCache(BaseCaching):
         dictt = self.cache_data
         stack = self.stack
 
-        # dictt[key] = item
+        dictt[key] = item
 
-        if key in dictt:
-            stack.remove(key)
+        if key not in stack:
+            stack.append(key)
 
-        elif len(dictt) >= BaseCaching.MAX_ITEMS:
-            discarded_key = stack.pop()
+        if len(stack) > BaseCaching.MAX_ITEMS:
+            discarded_key = stack.pop(-2)
             print("DISCARD: {}".format(discarded_key))
             del dictt[discarded_key]
 
-        dictt[key] = item
-        stack.append(key)
+        # dictt[key] = item
+        # stack.append(key)
 
     def get(self, key):
         """
