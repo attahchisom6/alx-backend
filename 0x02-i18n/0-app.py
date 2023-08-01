@@ -13,9 +13,7 @@ def Greeting():
     """
     return a greeting string
     """
-    greeting = "Welcome to Holberton"
-    header = "Hello world"
-    return render_template("0-index.html", greeting=greeting, header=header)
+    return render_template("0-index.html")
 
 
 if __name__ == "__main__":
