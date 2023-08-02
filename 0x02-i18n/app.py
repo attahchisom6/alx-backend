@@ -111,7 +111,7 @@ def simple_page():
     """
     to interface with a html script to render a simple page
     """
-    return render_template("7-index.html")
+    return render_template("index.html")
 
 
 if __name__ == "__main__":
