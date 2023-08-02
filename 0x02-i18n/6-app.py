@@ -8,12 +8,6 @@ from flask_babel import Babel
 
 app = Flask(__name__)
 babel = Babel(app)
-users = {
-    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
-    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
-    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
-    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
-}
 
 
 class Config:
@@ -37,23 +31,31 @@ def get_locale():
     supported_languages = app.config["LANGUAGES"]
 
     # Locale from URL parameters
-    if request.args.get("locale"):
-        local_lang = request.args.get("locale")
-        if local_lang in supported_languages:
-            return local_lang
+    local_lang = request.args.get("locale")
+    if local_lang in supported_languages:
+        return local_lang
 
     # Locale from user settings
-    if g.user:
-        local_lang = g.user.get("locale")
+    user_id = int(request.args.get("login_as"))
+    if user_id:
+        user = users.get(user_id)
+        local_lang = user.get("locale")
         if local_lang in supported_languages:
             return local_lang
 
     # Locale from request header
-    if request.headers.get("locale"):
-        local_lang = request.headers.get("locale")
-        if local_lang in supported_languages:
-            return local_lang
+    local_lang = request.headers.get("locale")
+    if local_lang in supported_languages:
+        return local_lang
     return request.accept_languages.best_match(supported_languages)
+
+
+users = {
+    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
+    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
+    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
+    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
+}
 
 
 def get_user(has_id):
@@ -77,7 +79,8 @@ def before_request():
     """
     has_id = request.args.get("login_as")
     user = get_user(has_id)
-    g.user = user
+    if user is not None:
+        g.user = user
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
@@ -85,7 +88,7 @@ def simple_page():
     """
     to interface with a html script to render a simple page
     """
-    return render_template("6-index.html")
+    return render_template("5-index.html")
 
 
 if __name__ == "__main__":
