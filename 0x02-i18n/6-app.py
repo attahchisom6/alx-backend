@@ -8,6 +8,12 @@ from flask_babel import Babel
 
 app = Flask(__name__)
 babel = Babel(app)
+users = {
+    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
+    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
+    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
+    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
+}
 
 
 class Config:
@@ -31,31 +37,23 @@ def get_locale():
     supported_languages = app.config["LANGUAGES"]
 
     # Locale from URL parameters
-    local_lang = request.args.get("locale")
-    if local_lang in supported_languages:
-        return local_lang
+    if request.args.get("locale"):
+        local_lang = request.args.get("locale")
+        if local_lang in supported_languages:
+            return local_lang
 
     # Locale from user settings
-    user_id = int(request.args.get("login_as"))
-    if user_id:
-        user = users.get(user_id)
-        local_lang = user.get("locale")
+    if g.user:
+        local_lang = g.user.get("locale")
         if local_lang in supported_languages:
             return local_lang
 
     # Locale from request header
-    local_lang = request.headers.get("locale")
-    if local_lang in supported_languages:
-        return local_lang
+    if request.headers.get("locale"):
+        local_lang = request.headers.get("locale")
+        if local_lang in supported_languages:
+            return local_lang
     return request.accept_languages.best_match(supported_languages)
-
-
-users = {
-    1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
-    2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
-    3: {"name": "Spock", "locale": "kg", "timezone": "Vulcan"},
-    4: {"name": "Teletubby", "locale": None, "timezone": "Europe/London"},
-}
 
 
 def get_user(has_id):
