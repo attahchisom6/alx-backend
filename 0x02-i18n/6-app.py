@@ -37,9 +37,10 @@ def get_locale():
     supported_languages = app.config["LANGUAGES"]
 
     # Locale from URL parameters
-    local_lang = request.args.get("locale")
-    if local_lang in supported_languages:
-        return local_lang
+    if request.args.get("locale"):
+        local_lang = request.args.get("locale")
+        if local_lang in supported_languages:
+            return local_lang
 
     # Locale from user settings
     if g.user:
@@ -48,9 +49,10 @@ def get_locale():
             return local_lang
 
     # Locale from request header
-    local_lang = request.headers.get("locale")
-    if local_lang in supported_languages:
-        return local_lang
+    if request.headers.get("locale"):
+        local_lang = request.headers.get("locale")
+        if local_lang in supported_languages:
+            return local_lang
     return request.accept_languages.best_match(supported_languages)
 
 
