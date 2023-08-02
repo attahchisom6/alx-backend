@@ -79,8 +79,7 @@ def before_request():
     """
     has_id = request.args.get("login_as")
     user = get_user(has_id)
-    if user is not None:
-        g.user = user
+    g.user = user
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
