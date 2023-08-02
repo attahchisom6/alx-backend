@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """ Basic Flask app, Basic Babel setup, Get locale from request,
-    Parametrize templates, Force locale with URL parameter, Mock logging in """
+    Parametrize templates, Force locale with URL parameter, Mock logging in,
+    Use user locale """
 from flask import Flask, render_template, request, g
 from flask_babel import Babel, gettext
 
@@ -30,7 +31,7 @@ app.config.from_object(Config)
 @app.route('/')
 def root():
     """ basic Flask app """
-    return render_template("5-index.html")
+    return render_template("6-index.html")
 
 
 @babel.localeselector
@@ -40,8 +41,15 @@ def get_locale():
     supportLang = app.config['LANGUAGES']
     if localLang in supportLang:
         return localLang
-    else:
-        return request.accept_languages.best_match(app.config['LANGUAGES'])
+    userId = request.args.get('login_as')
+    if userId:
+        localLang = users[int(userId)]['locale']
+        if localLang in supportLang:
+            return localLang
+    localLang = request.headers.get('locale')
+    if localLang in supportLang:
+        return localLang
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
 def get_user():

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """ Basic Flask app, Basic Babel setup, Get locale from request,
-    Parametrize templates, Force locale with URL parameter, Mock logging in """
+    Parametrize templates, Force locale with URL parameter, Mock logging in,
+    Use user locale, Infer appropriate time zone """
 from flask import Flask, render_template, request, g
 from flask_babel import Babel, gettext
+import pytz
 
 app = Flask(__name__)
 babel = Babel(app)
@@ -30,7 +32,7 @@ app.config.from_object(Config)
 @app.route('/')
 def root():
     """ basic Flask app """
-    return render_template("5-index.html")
+    return render_template("7-index.html")
 
 
 @babel.localeselector
@@ -40,8 +42,15 @@ def get_locale():
     supportLang = app.config['LANGUAGES']
     if localLang in supportLang:
         return localLang
-    else:
-        return request.accept_languages.best_match(app.config['LANGUAGES'])
+    userId = request.args.get('login_as')
+    if userId:
+        localLang = users[int(userId)]['locale']
+        if localLang in supportLang:
+            return localLang
+    localLang = request.headers.get('locale')
+    if localLang in supportLang:
+        return localLang
+    return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
 def get_user():
@@ -59,6 +68,23 @@ def before_request():
     """ use get_user to find a user if any,
     and set it as a global on flask.g.user  """
     g.user = get_user()
+
+
+@babel.timezoneselector
+def get_timezone():
+    """ Infer appropriate time zone """
+    localTimezone = request.args.get('timezone')
+    if localTimezone in pytz.all_timezones:
+        return localTimezone
+    else:
+        raise pytz.exceptions.UnknownTimeZoneError
+    userId = request.args.get('login_as')
+    localTimezone = users[int(userId)]['timezone']
+    if localTimezone in pytz.all_timezones:
+        return localTimezone
+    else:
+        raise pytz.exceptions.UnknownTimeZoneError
+    return app.config['BABEL_DEFAULT_TIMEZONE']
 
 
 if __name__ == "__main__":
