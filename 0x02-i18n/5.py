@@ -35,7 +35,6 @@ def get_locale():
     else:
         return request.accept_languages.best_match(supported_languages)
 
-
 users = {
     1: {"name": "Balou", "locale": "fr", "timezone": "Europe/Paris"},
     2: {"name": "Beyonce", "locale": "en", "timezone": "US/Central"},
@@ -44,29 +43,28 @@ users = {
 }
 
 
-def get_user(has_id):
+def get_user(login_as):
     """
     return a user dictionary containing a user information
     """
-    if has_id is None:
+    if login_as is None:
         return None
 
     for user_id, user_info in users.items():
-        if user_id == int(has_id):
+        if user_id == int(login_as):
             return user_info
     return None
 
-
-@app.before_request
-def before_request():
-    """
-    will get a user using get user and set him as a
-    global user
-    """
-    has_id = request.args.get("login_as")
-    user = get_user(has_id)
-    if user is not None:
-        g.user = user
+    @app.before_request
+    def before_request():
+        """
+        will get a user using get user and set him as a
+        global user
+        """
+        search_user = requests.args.get("login_as")
+        user = get_user(search_user)
+        if user is not None:
+            g.user = user
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
