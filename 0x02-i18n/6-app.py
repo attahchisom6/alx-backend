@@ -47,8 +47,7 @@ def get_locale():
     local_lang = request.headers.get("locale")
     if local_lang in supported_languages:
         return local_lang
-    else:
-        return request.accept_languages.best_match(supported_languages)
+    return request.accept_languages.best_match(supported_languages)
 
 
 users = {
