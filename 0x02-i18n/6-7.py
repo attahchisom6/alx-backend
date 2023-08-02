@@ -4,7 +4,6 @@ module main frame our code into desired languages
 """
 from flask import Flask, render_template, request, g
 from flask_babel import Babel
-import pytz
 
 
 app = Flask(__name__)
@@ -78,31 +77,8 @@ def before_request():
     """
     has_id = request.args.get("login_as")
     user = get_user(has_id)
-    g.user = user
-
-
-@babel.timezoneselector
-def get_timezone():
-    """
-    select the best time zone based on users choice
-    """
-    # find time zone parameters in url parameters
-    if request.args.get('timezone'):
-        local_tZone = request.args.get("timezone")
-        if local_tZone in pytz.all_timezone:
-            return local_tZone
-        else:
-            raise pytz.exceptions.UnknownTimeZoneError
-
-    # find rime zone from user setting
-    if g.user:
-        local_tZone = g.user.get("timezone")
-        if local_tZone in pytz.all_timezones:
-            return local_tZone
-        else:
-            raise pytz.exceptions.UnknownTimeZoneError
-    else:
-        return app.config["BABEL_DEFAULT_TIMEZONE"]
+    if user is not None:
+        g.user = user
 
 
 @app.route("/", methods=["GET"], strict_slashes=False)
@@ -110,7 +86,7 @@ def simple_page():
     """
     to interface with a html script to render a simple page
     """
-    return render_template("7-index.html")
+    return render_template("5-index.html")
 
 
 if __name__ == "__main__":
