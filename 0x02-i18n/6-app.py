@@ -42,10 +42,8 @@ def get_locale():
         return local_lang
 
     # Locale from user settings
-    user_id = int(request.args.get("login_as"))
-    if user_id:
-        user = users.get(user_id)
-        local_lang = user.get("locale")
+    if g.user:
+        local_lang = g.user.get("locale")
         if local_lang in supported_languages:
             return local_lang
 
