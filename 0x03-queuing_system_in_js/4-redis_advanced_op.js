@@ -11,16 +11,16 @@ client.on('error', (error) => {
 });
 
 const dict = {
-  'Portland': 50,
-  'Seattle': 80,
+  Portland: 50,
+  Seattle: 80,
   'New York': 20,
-  'Bogota': 20,
-  'Cali': 40,
-  'Paris': 2,
+  Bogota: 20,
+  Cali: 40,
+  Paris: 2,
 };
 
 const keyValueList = Object.entries(dict);
-keyValueList.map([key, value] => {
+keyValueList.map(async ([key, value]) => {
   client.hset('HolbertonSchools', key, value, (error, reply) => {
     if (error) {
       console.error(error);
@@ -33,6 +33,6 @@ client.hgetall('HolbertonSchools', (error, reply) => {
   if (error) {
     console.log(error);
   }
-  redis.print(reply);
+  console.log(reply);
   client.quit();
 });
