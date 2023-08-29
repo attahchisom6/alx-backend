@@ -1,5 +1,5 @@
 import kue from 'kue';
-import createPushNotificationsJobs from './8-job':
+import createPushNotificationsJobs from './8-job';
 import { expect } from 'chai';
 
 describe('testing the createPushNotificationJobs function', () => {
@@ -65,15 +65,31 @@ describe('testing the createPushNotificationJobs function', () => {
   });
 
   it('Test if our code handles appropraitely the failed occasion', (done) => {
-    const jobs = {
-      phoneNumber: '05054748698',
-      message: 'Got an error sending to u',
-    }
+    const jobs = [
+      {
+        phoneNumber: '05054748698',
+        message: 'Got an error sending to u',
+      },
+    ]
     createPushNotificationsJobs(jobs, queue);
 
-    queTest.jobs[0].emit('failed', new Error('failed job'));
-    expect(console.log.callWith(`Notification job ${jobs[0].id} failed: ${error}`)).to.be.true;
+    const error = 'Failed job';
+    queTest.jobs[0].emit('failed', new Error(error));
+    expect(console.log.calledWithMatch(`Notification job ${jobs[0].id} failed: ${error}`)).to.be.true;
     done();
+  });
+
+  it('Test for job progress', (done) => {
+    const jobs = [
+      {
+        phoneNumber: '09054328778',
+        message: 'loggin user in progress',
+      },
+    ];
+    createPushNotificationsJobs(jobs, queue);
+
+    queTest.jobs[0].emit('progress', 50);
+    expect(console.log.calledWithMatch(`Notification job ${job.id} 50% complete`)).to.be.true;
   });
 
 });
