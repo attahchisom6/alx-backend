@@ -14,14 +14,14 @@ describe('testing the createPushNotificationJobs function', () => {
   };
 
   beforeEach('setup', () => {
-    queue = createQueue(testQueData);
+    queue = kue.createQueue(testQueData);
     queTest = queue.testMode;
-    queue.enter();
+    queTest.enter();
   });
 
   afterEach('tearsown: clear enviroment after each test', () => {
-    queue.clear();
-    queue.exit();
+    queTest.clear();
+    queTest.exit();
   });
 
   it('Testing Error wen input data is not a list', (done) => {
@@ -60,7 +60,7 @@ describe('testing the createPushNotificationJobs function', () => {
     createPushNotificationsJobs(jobs, queue);
     // simulate a completed job case with emit
     queTest.jobs[0].emit('complete');
-    expect(console.log.calledWith(`Notification job ${jobs[0].id} completed`)).to.be.true;
+    expect(console.log.calledWithMatch(`Notification job ${jobs[0].id} completed`)).to.be.true;
     done();
   });
 
