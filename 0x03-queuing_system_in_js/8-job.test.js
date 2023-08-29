@@ -1,9 +1,10 @@
 import kue from 'kue';
 import createPushNotificationsJobs from './8-job';
 import { expect } from 'chai';
+import sinon from 'sinon';
 
 describe('testing the createPushNotificationJobs function', () => {
-  let queue, queTest;
+  let queue, queTest, consoleSpy;
 
   const testQueData = {
     redis: {
@@ -14,12 +15,15 @@ describe('testing the createPushNotificationJobs function', () => {
   };
 
   beforeEach('setup', () => {
+    consoleSpy = sinon.spy(console, 'log');
     queue = kue.createQueue(testQueData);
     queTest = queue.testMode;
     queTest.enter();
   });
 
   afterEach('tearsown: clear enviroment after each test', () => {
+    consoleSpy.restore();
+
     queTest.clear();
     queTest.exit();
   });
@@ -60,7 +64,7 @@ describe('testing the createPushNotificationJobs function', () => {
     createPushNotificationsJobs(jobs, queue);
     // simulate a completed job case with emit
     queTest.jobs[0].emit('complete');
-    expect(console.log.calledWithMatch(`Notification job ${jobs[0].id} completed`)).to.be.true;
+    expect(consoleSpy.calledWithMatch(`Notification job ${queTest.jobs[0].id} completed`)).to.be.true;
     done();
   });
 
@@ -68,14 +72,14 @@ describe('testing the createPushNotificationJobs function', () => {
     const jobs = [
       {
         phoneNumber: '05054748698',
-        message: 'Got an error sending to u',
+        message: 'Apologies, an error occured while sending a response',
       },
     ]
     createPushNotificationsJobs(jobs, queue);
 
     const error = 'Failed job';
     queTest.jobs[0].emit('failed', new Error(error));
-    expect(console.log.calledWithMatch(`Notification job ${jobs[0].id} failed: ${error}`)).to.be.true;
+    expect(consoleSpy.calledWithMatch(`Notification job ${queTest.jobs[0].id} failed: ${error}`)).to.be.true;
     done();
   });
 
@@ -89,7 +93,8 @@ describe('testing the createPushNotificationJobs function', () => {
     createPushNotificationsJobs(jobs, queue);
 
     queTest.jobs[0].emit('progress', 50);
-    expect(console.log.calledWithMatch(`Notification job ${job.id} 50% complete`)).to.be.true;
+    expect(consoleSpy.calledWithMatch(`Notification job ${queTest.jobs[0].id} 50% complete`)).to.be.true;
+    done();
   });
 
 });
