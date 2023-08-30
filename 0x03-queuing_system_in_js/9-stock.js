@@ -30,7 +30,7 @@ const listProducts = [
 ]
 
 function getItemById(id) {
-  return listProbucts.find((item) => item.Id === id);
+  return listPrdducts.find((item) => item.Id === id);
 
 // express instance
 const app = express();
@@ -67,7 +67,7 @@ app.get('/reserve_product/:itemId', async (req, res) => {
   if (!item) {
     res.status(404).json({"status":"Product not found"});
   }
-  const currentQuantity = await getCurrentRerservedStockById(id);
+  const currentQuantity = await getCurrentReservedStockById(id);
 
   if (currentQuantity === null) {
     res.status(500).json({"status":"This item is no longer available","itemId": id});
