@@ -1,6 +1,6 @@
 import express from 'express';
 import redis from 'redis';
-import promisify from 'util';
+import { promisify } from 'util';
 
 const listProducts = [
   {
@@ -30,44 +30,53 @@ const listProducts = [
 ]
 
 function getItemById(id) {
-  listProducts.map((item) => {
-    if (item.Id === id) {
-      return item;
-    }
-    return;
-  });
-};
+  return listProbucts.find((item) => item.Id === id);
 
 // express instance
 const app = express();
 app.use(express.json());
 
 app.get('/list_products', (req, res) => {
-  // const data = JSON.stringify(lstProducts);
-  res.status(200).send(listProducts);
+  // use the json method to send json formatted messages
+  res.status(200).json(listProducts);
 });
 
-app.get('/list_products/:itemId', (req, res) => {
-  const id = req.get(itemId);
-  if (!id) {
-    res.send({"status":"Product not found"});
-    return;
+app.get('/list_products/:itemId', async (req, res) => {
+  const id = parseInt(req.params.itemId);
+
+  const item = getItemById(id);
+  if (!item) {
+    res.status(404).json({"status":"Product not found"});
   }
-  const item = getCurrentReservedStockById(id);
-  return item;
+
+  const currentQuantity = await getCurrentReservedStockBy(id);
+  const jsonItem = {
+    "itemId": item.Id,
+    "itemName": item.name,
+    "prie": item.price,
+    "initialAvailableQuantity": item.stock,
+    "currentQuantity": parseInt(currentQuantity),
+  };
+  res.status(200).json(jsonItem);
 };
 
-app.get('/reserve_product/:itemId', (req, res) => {
-  const id = req.get(itemId);
-  if (!id) {
-    res.send({"status":"Product not found"});
+app.get('/reserve_product/:itemId', async (req, res) => {
+  const id = parseInt(req.params.itemId);
+
+  const item = getItemById(id);
+  if (!item) {
+    res.status(404).json({"status":"Product not found"});
   }
-  const items = getCurrentRerservedStock(id);
-  if (item.length === 1) {
-    res.send('{"status":"Not enough stock available","itemId":1}';)
+  const currentQuantity = await getCurrentRerservedStock(id);
+
+  if (currentQuantity === null) {
+    res.status(500).json({"status":"This item is no longer available","itemId": id});
+  } else if (parseInt(currentQuantity) < 0) {
+    res.json({"status":"Not enough stock available","itemId":id});
+  } else {
+    reserveStockById(id, parseInt(currentQuantity) - 1);
+  res.status(200).json({"status":"Reservation confirmed","itemId":id});
   }
-  reserveStockById(items[o].id, item);
-  res.send({"status":"Reservation confirmed","itemId":1});
 }
 
 // redis server
@@ -82,7 +91,7 @@ client.on('connec', () => {
 function reserveStockById(itemId, stock) {
   client.set(itemId, stock, (err, reply) => {
     if (err) {
-      console.error(error);
+      console.error(err);
     }
     redis.print(reply);
   });
@@ -95,6 +104,8 @@ async function getCurrentReservedStockById(itemId) {
   return result;
 }
 
-app.listen(1245, '0.0.0.0');
+app.listen(1245, '0.0.0.0', () => {
+  console.log('Connected to redis server on port 1245, all ports');
+});
 
 module.exports = app;
