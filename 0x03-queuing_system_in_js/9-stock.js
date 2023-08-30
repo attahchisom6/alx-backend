@@ -49,16 +49,16 @@ app.get('/list_products/:itemId', async (req, res) => {
     res.status(404).json({"status":"Product not found"});
   }
 
-  const currentQuantity = await getCurrentReservedStockBy(id);
+  const currentQuantity = await getCurrentReservedStockById(id);
   const jsonItem = {
     "itemId": item.Id,
     "itemName": item.name,
-    "prie": item.price,
+    "price": item.price,
     "initialAvailableQuantity": item.stock,
     "currentQuantity": parseInt(currentQuantity),
   };
   res.status(200).json(jsonItem);
-};
+});
 
 app.get('/reserve_product/:itemId', async (req, res) => {
   const id = parseInt(req.params.itemId);
@@ -67,21 +67,21 @@ app.get('/reserve_product/:itemId', async (req, res) => {
   if (!item) {
     res.status(404).json({"status":"Product not found"});
   }
-  const currentQuantity = await getCurrentRerservedStock(id);
+  const currentQuantity = await getCurrentRerservedStockById(id);
 
   if (currentQuantity === null) {
     res.status(500).json({"status":"This item is no longer available","itemId": id});
-  } else if (parseInt(currentQuantity) < 0) {
-    res.json({"status":"Not enough stock available","itemId":id});
+  } else if (parseInt(currentQuantity) <= 0) {
+    res.status(400).json({"status":"Not enough stock available","itemId":id});
   } else {
     reserveStockById(id, parseInt(currentQuantity) - 1);
   res.status(200).json({"status":"Reservation confirmed","itemId":id});
   }
-}
+});
 
 // redis server
 const client = redis.createClient();
-client.on('connec', () => {
+client.on('connect', () => {
   console.log('connected to redis server, welcome!');
 })
 .on('error', () => {
