@@ -30,15 +30,22 @@ const listProducts = [
 ]
 
 function getItemById(id) {
-  return listPrdducts.find((item) => item.Id === id);
+  return listProducts.find((item) => item.Id === id);
+}
 
 // express instance
 const app = express();
 app.use(express.json());
 
 app.get('/list_products', (req, res) => {
+  const listFormat = listProducts.forEach((item) => {
+    "itemId": item.id,
+      "itemName": item.name,
+      "price": item.price,
+      "initialAvailableQuantity": item.stock,
+  });
   // use the json method to send json formatted messages
-  res.status(200).json(listProducts);
+  res.status(200).json(listFormat);
 });
 
 app.get('/list_products/:itemId', async (req, res) => {
@@ -82,7 +89,7 @@ app.get('/reserve_product/:itemId', async (req, res) => {
 // redis server
 const client = redis.createClient();
 client.on('connect', () => {
-  console.log('connected to redis server, welcome!');
+  console.log('Running redis server, welcome!');
 })
 .on('error', () => {
   console.log('Error: Not Connected');
@@ -105,7 +112,7 @@ async function getCurrentReservedStockById(itemId) {
 }
 
 app.listen(1245, '0.0.0.0', () => {
-  console.log('Connected to redis server on port 1245, all ports');
+  console.log('Connected to redis server on port 1245, accessible on all host');
 });
 
 module.exports = app;
