@@ -42,7 +42,7 @@ async function getCurrentAvailableSeats() {
 const queue = kue.createQueue();
 
 // express Server creation
-app = express()
+const app = express()
 app.use(express.json());
 
 app.get('/available_seats', async (req, res) => {
@@ -69,12 +69,12 @@ app.get('/reserve_seat', (req, res) => {
 });
 
 app.get('/process', async (req, res) => {
-  queue.process('reserve_seat',async (job, done) => {
   const currentAvailableSeats = getCurrentAvailableSeats();
 
-    if (currentAvailableSeats === 0) {
-      reservationEnabled = false;
-    } else if (currentAvailableSeat >= 1) {
+  if (currentAvailableSeats === 0) {
+    reservationEnabled = false;
+  } else if (currentAvailableSeat >= 1) {
+    queue.process('reserve_seat', async (job, done) => {
       try {
         const newAvailableSeats = currentAvailableSeats - 1;
         if (newAvailableSeats === 0) {
@@ -84,13 +84,19 @@ app.get('/process', async (req, res) => {
         done();
       } catch(error) {
         console.log('Not enough seats available');
-        res.json('Not enough seats available');
+        done('Not enough seats available');
       }
-    } else {
+    });
+    console.log({ "status": "Queue processing" });
+    res.json({ "status": "Queue processing" });
+  } else {
     console.log('Not enough seats available');
     res.json('Not enough seats available');
-    }
-  });
-  console.log({ "status": "Queue processing" });
-  res.json({ "status": "Queue processing" });
+  }
 });
+
+app.listen(1245, '0.0.0.0', () => {
+  console.log('Connected to redis sever, port 1245 listening on all host');
+});
+
+module.exports = app;
