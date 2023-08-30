@@ -5,23 +5,18 @@ import express from 'express';
 
 // creating redis server
 const client = redis.createClient();
-let available_seats;
-boolean reservationEnabled = true;
+let availableSeats = 50;
+let reservationEnabled = true;
 
 client.on('connect', () => {
   console.log('Running Redis server Welcome!');
-  available_seats = 50;
-  if (available_seats === 0) {
-    reservationEnabled = false;
-  }
-  reservationEnabled = true;
 })
 .on('error', (error) => {
   console.error(error);
 });
 
 function reserveSeat(number) {
-  client.set(available_seats, number, (err, reply) => {
+  client.set('availableSeats', number, (err, reply) => {
     if (err) {
       console.error(err);
     }
@@ -31,12 +26,16 @@ function reserveSeat(number) {
 
 const asyncGet = promisify(client.get).bind(client);
 
-async function getCurrentAvailableSeats(available_seats) {
-  const result = await asyncGet(available_seats);
-  if (!result) {
-    console.log("Can't read from the database");
-  };
-  return result;
+async function getCurrentAvailableSeats() {
+  try {
+    const result = await asyncGet(availableSeats);
+    if (!result) {
+      console.log("Can't read from the database");
+    }
+    return parseInt(result);
+  } catch(error) {
+    console.error(error);
+  }
 }
 
 // queue creation
@@ -47,7 +46,7 @@ app = express()
 app.use(express.json());
 
 app.get('/available_seats', async (req, res) => {
-  const numCurrentSeat = await getCurrentAvailableSeats(available_seats);
+  const numCurrentSeat = await getCurrentAvailableSeats();
   res.json({"numberOfAvailableSeats":numCurrentSeats});
 });
 
@@ -70,18 +69,28 @@ app.get('/reserve_seat', (req, res) => {
 });
 
 app.get('/process', async (req, res) => {
-  await res.json({ "status": "Queue processing" });
-  queue.process('reserve_seat', (job, done) => {
-    const num = await getCurrentAvailableSeats(available_seats - 1);
-    reserveSeats(num);
+  queue.process('reserve_seat',async (job, done) => {
+  const currentAvailableSeats = getCurrentAvailableSeats();
 
-    if (num === 0) {
+    if (currentAvailableSeats === 0) {
       reservationEnabled = false;
-    } else if (num > 0) {
-      cons
+    } else if (currentAvailableSeat >= 1) {
+      try {
+        const newAvailableSeats = currentAvailableSeats - 1;
+        if (newAvailableSeats === 0) {
+          reservationEnabled = false;
+        }
+        reserveSeat(newAvailableSeats);
+        done();
+      } catch(error) {
+        console.log('Not enough seats available');
+        res.json('Not enough seats available');
+      }
     } else {
-      console.log('Not enough seats available');
-      queue.exit();
+    console.log('Not enough seats available');
+    res.json('Not enough seats available');
     }
   });
-}
+  console.log({ "status": "Queue processing" });
+  res.json({ "status": "Queue processing" });
+});
