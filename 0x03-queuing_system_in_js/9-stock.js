@@ -87,9 +87,23 @@ app.get('/reserve_product/:itemId', async (req, res) => {
 });
 
 // redis server
+
+// Initialize Redis with listProducts data when the server starts
+function initializeRedis() {
+  listProducts.forEach((product) => {
+    client.set(product.Id.toString(), product.stock, (err, reply) => {
+      if (err) {
+        console.error(err);
+      }
+      redis.print(reply);
+    });
+  });
+}
+
 const client = redis.createClient();
 client.on('connect', () => {
   console.log('Running redis server, welcome!');
+  initializeRedis();
 })
 .on('error', () => {
   console.log('Error: Not Connected');
