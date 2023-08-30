@@ -38,12 +38,12 @@ const app = express();
 app.use(express.json());
 
 app.get('/list_products', (req, res) => {
-  const listFormat = listProducts.forEach((item) => {
+  const listFormat = listProducts.map((item) => ({
     "itemId": item.id,
       "itemName": item.name,
       "price": item.price,
       "initialAvailableQuantity": item.stock,
-  });
+  }));
   // use the json method to send json formatted messages
   res.status(200).json(listFormat);
 });
