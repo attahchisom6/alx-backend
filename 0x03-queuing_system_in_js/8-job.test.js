@@ -7,6 +7,7 @@ describe('testing the createPushNotificationJobs function', () => {
   let queue, queTest, consoleSpy;
 
   const testQueData = {
+    name: 'push_notification_code_test',
     redis: {
       host: '127.0.0.1',
       port: '6379',
@@ -21,14 +22,14 @@ describe('testing the createPushNotificationJobs function', () => {
     queTest.enter();
   });
 
-  afterEach('tearsown: clear enviroment after each test', () => {
+  afterEach('teardown: clear/reset each queue after each test', () => {
     consoleSpy.restore();
 
     queTest.clear();
     queTest.exit();
   });
 
-  it('Testing Error wen input data is not a list', (done) => {
+  it('Testing Error wen input data is not a array', (done) => {
     const jobs = {
       phoneNumber: '01055683941',
       message: 'this is a wrong number',
@@ -49,8 +50,11 @@ describe('testing the createPushNotificationJobs function', () => {
         message: 'This is also a valid user',
       }
     ];
+    expect(queTest.jobs.length).to.equal(0);
+
     createPushNotificationsJobs(jobs, queue);
     expect(queTest.jobs.length).to.equal(2);
+    expect(queTest.jobs[0].type).to.equal('push_notification_code_3');
     done();
   });
 
@@ -77,9 +81,8 @@ describe('testing the createPushNotificationJobs function', () => {
     ]
     createPushNotificationsJobs(jobs, queue);
 
-    const error = 'Failed job';
-    queTest.jobs[0].emit('failed', new Error(error));
-    expect(consoleSpy.calledWithMatch(`Notification job ${queTest.jobs[0].id} failed: ${error}`)).to.be.true;
+    queTest.jobs[0].emit('failed', 'Failed job');
+    expect(consoleSpy.calledWithMatch(`Notification job ${queTest.jobs[0].id} failed: Failed job`)).to.be.true;
     done();
   });
 
@@ -92,7 +95,7 @@ describe('testing the createPushNotificationJobs function', () => {
     ];
     createPushNotificationsJobs(jobs, queue);
 
-    queTest.jobs[0].emit('progress', 50);
+    queTest.jobs[0].emit('progress', '50%');
     expect(consoleSpy.calledWithMatch(`Notification job ${queTest.jobs[0].id} 50% complete`)).to.be.true;
     done();
   });
