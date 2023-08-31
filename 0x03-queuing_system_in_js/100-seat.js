@@ -5,11 +5,21 @@ import express from 'express';
 
 // creating redis server
 const client = redis.createClient();
-let availableSeats = 50;
+
 let reservationEnabled = true;
+
+function initializeData(availableSeats) {
+  client.set('availableSeats', availableSeats, (error, reply) => {
+    if (error) {
+      console.error(error);
+    }
+    redis.print(reply);
+  });
+}
 
 client.on('connect', () => {
   console.log('Running Redis server Welcome!');
+  initializeData(50);
 })
 .on('error', (error) => {
   console.error(error);
@@ -30,7 +40,7 @@ async function getCurrentAvailableSeats() {
   try {
     let result = await asyncGet('availableSeats');
     if (!result) {
-      result = "Can't read from the database";
+      result = "Sorry, No available seat in store";
       console.log("Can't read from the database");
     }
     return result;
