@@ -84,23 +84,25 @@ app.get('/reserve_seat', (req, res) => {
 app.get('/process', async (req, res) => {
   queue.process('reserve_seat', async (job, done) => {
     try {
-      const currentAvailableSeats = getCurrentAvailableSeats();
+      const currentAvailableSeats = await getCurrentAvailableSeats();
 
       if (currentAvailableSeats === 'Sorry, No available seat in store') {                  console.log('Not enough seats available');
         res.json('Not enough seats available');
+        return;
       }
 
       if (parseInt(currentAvailableSeats) === 0) {
         reservationEnabled = false;
-      }
-
-      if (parseInt(currentAvailableSeats) >= 1) {
+      } else if (parseInt(currentAvailableSeats) >= 1) {
         const newAvailableSeats = currentAvailableSeats - 1;
         if (newAvailableSeats === 0) {
           reservationEnabled = false;
         }
         reserveSeat(newAvailableSeats);
         done();
+      } else {
+        console.log('Not enough seats available');
+        res.json('Not enough seats available');
       }
     } catch(error) {
       console.log('Not enough seats available');
@@ -109,6 +111,7 @@ app.get('/process', async (req, res) => {
   });
   console.log({ "status": "Queue processing" });
   res.json({ "status": "Queue processing" });
+});
 
 app.listen(1245, '0.0.0.0', () => {
   console.log('Connected to redis sever, port 1245 listening on all host');
