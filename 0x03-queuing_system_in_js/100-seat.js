@@ -28,11 +28,12 @@ const asyncGet = promisify(client.get).bind(client);
 
 async function getCurrentAvailableSeats() {
   try {
-    const result = await asyncGet(availableSeats);
+    let result = await asyncGet('availableSeats');
     if (!result) {
+      result = "Can't read from the database";
       console.log("Can't read from the database");
     }
-    return parseInt(result);
+    return result;
   } catch(error) {
     console.error(error);
   }
@@ -46,7 +47,7 @@ const app = express()
 app.use(express.json());
 
 app.get('/available_seats', async (req, res) => {
-  const numCurrentSeat = await getCurrentAvailableSeats();
+  const numCurrentSeats = await getCurrentAvailableSeats();
   res.json({"numberOfAvailableSeats":numCurrentSeats});
 });
 
@@ -58,11 +59,13 @@ app.get('/reserve_seat', (req, res) => {
   job.save((error) => {
     if (!error) {
       res.json({ "status": "Reservation in process" });
+    } else {
+      res.json({ "status": "Reservation failed" });
     }
-    res.json({ "status": "Reservation failed" });
   })
   .on('complete', () => {
-    console.log(`Seat reservation job ${job.id} completed`)
+    console.log(`Seat reservation job ${job.id} completed`);
+  })
   .on('failed', (error) => {
     console.error(`Seat reservation job ${job.id} failed: ${error}`)
   });
@@ -73,7 +76,7 @@ app.get('/process', async (req, res) => {
 
   if (currentAvailableSeats === 0) {
     reservationEnabled = false;
-  } else if (currentAvailableSeat >= 1) {
+  } else if (currentAvailableSeats >= 1) {
     queue.process('reserve_seat', async (job, done) => {
       try {
         const newAvailableSeats = currentAvailableSeats - 1;
